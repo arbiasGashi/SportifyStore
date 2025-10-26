@@ -2,6 +2,7 @@
 using Asp.Versioning;
 using Catalog.Application.Mappers;
 using Catalog.Application.Queries;
+using Catalog.Application.Sorting;
 using Catalog.Core.Repositories;
 using Catalog.Infrastructure.Data;
 using Catalog.Infrastructure.Repositories;
@@ -55,6 +56,14 @@ namespace Catalog.API
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped<ITypeRepository, TypeRepository>();
             builder.Services.AddScoped<IBrandRepository, BrandRepository>();
+
+            // Sorting strategies
+            builder.Services.AddScoped<ISortStrategy, PriceAscSortStrategy>();
+            builder.Services.AddScoped<ISortStrategy, PriceDescSortStrategy>();
+            builder.Services.AddScoped<ISortStrategy, NameSortStrategy>();
+
+            // Sorting factory
+            builder.Services.AddScoped<ISortStrategyFactory, SortStrategyFactory>();
 
             var app = builder.Build();
 
