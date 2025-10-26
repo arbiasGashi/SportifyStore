@@ -5,7 +5,7 @@ using Catalog.Infrastructure.Data;
 using MongoDB.Driver;
 
 namespace Catalog.Infrastructure.Repositories;
-public class ProductRepository : IProductRepository, IBrandRepository, ITypeRepository
+public class ProductRepository : IProductRepository
 {
     private readonly ICatalogContext _context;
 
@@ -130,21 +130,5 @@ public class ProductRepository : IProductRepository, IBrandRepository, ITypeRepo
             .ReplaceOneAsync(p => p.Id == product.Id, product);
 
         return updatedProduct.IsAcknowledged && updatedProduct.ModifiedCount > 0;
-    }
-
-    public async Task<IEnumerable<ProductBrand>> GetAllBrands()
-    {
-        return await _context
-            .Brands
-            .Find(b => true)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<ProductType>> GetAllTypes()
-    {
-        return await _context
-            .Types
-            .Find(t => true)
-            .ToListAsync();
     }
 }

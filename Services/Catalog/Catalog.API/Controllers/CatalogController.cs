@@ -61,28 +61,6 @@ public class CatalogController : ApiController
         return Ok(result);
     }
 
-    [HttpGet]
-    [Route("GetAllBrands")]
-    [ProducesResponseType(typeof(IEnumerable<BrandResponse>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult<IEnumerable<BrandResponse>>> GetAllBrands()
-    {
-        var query = new GetAllBrandsQuery();
-        var result = await _mediator.Send(query);
-
-        return Ok(result);
-    }
-
-    [HttpGet]
-    [Route("GetAllTypes")]
-    [ProducesResponseType(typeof(IEnumerable<TypeResponse>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult<IEnumerable<TypeResponse>>> GetAllTypes()
-    {
-        var query = new GetAllTypesQuery();
-        var result = await _mediator.Send(query);
-
-        return Ok(result);
-    }
-
     [HttpPost]
     [Route("CreateProduct")]
     [ProducesResponseType(typeof(ProductResponse), (int)HttpStatusCode.OK)]
