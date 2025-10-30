@@ -12,7 +12,7 @@ public class ProductRepository : IProductRepository
     private readonly ICatalogContext _context;
     private readonly ISortStrategyFactory _sortStrategyFactory;
 
-    private static readonly Collation _caseInsensitiveCollation = 
+    private static readonly Collation _caseInsensitiveCollation =
         new("en", strength: CollationStrength.Secondary);
 
     public ProductRepository(ICatalogContext context, ISortStrategyFactory sortStrategyFactory)
@@ -46,9 +46,9 @@ public class ProductRepository : IProductRepository
         }
 
         // Count with collation (for equality parts)
-        var countOptions = new CountOptions 
-        { 
-            Collation = _caseInsensitiveCollation 
+        var countOptions = new CountOptions
+        {
+            Collation = _caseInsensitiveCollation
         };
         var totalItems = await _context.Products.CountDocumentsAsync(filter, countOptions);
 
@@ -108,8 +108,8 @@ public class ProductRepository : IProductRepository
     {
         var filter = Builders<Product>.Filter.Eq(p => p.Name, name);
         var options = new FindOptions<Product>
-        { 
-            Collation = _caseInsensitiveCollation 
+        {
+            Collation = _caseInsensitiveCollation
         };
 
         using var cursor = await _context.Products.FindAsync(filter, options);

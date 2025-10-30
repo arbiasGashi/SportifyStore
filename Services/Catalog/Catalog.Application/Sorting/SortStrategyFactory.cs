@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Catalog.Application.Sorting;
+﻿namespace Catalog.Application.Sorting;
 public class SortStrategyFactory : ISortStrategyFactory
 {
     private readonly IEnumerable<ISortStrategy> _strategies;
@@ -16,12 +10,12 @@ public class SortStrategyFactory : ISortStrategyFactory
 
     public ISortStrategy GetStrategy(string sortOption)
     {
-        if (string.IsNullOrWhiteSpace(sortOption)) 
+        if (string.IsNullOrWhiteSpace(sortOption))
         {
             sortOption = "name";
         }
 
-        var strategy = _strategies.FirstOrDefault(s => 
+        var strategy = _strategies.FirstOrDefault(s =>
             s.Key.Equals(sortOption, StringComparison.OrdinalIgnoreCase));
 
         return strategy ?? _strategies.First(s => s.Key == "name");
