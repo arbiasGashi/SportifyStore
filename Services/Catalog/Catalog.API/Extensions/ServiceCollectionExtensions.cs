@@ -1,10 +1,12 @@
 ﻿using Asp.Versioning;
 using Catalog.Application.Mappers;
 using Catalog.Application.Queries;
-using Catalog.Application.Sorting;
 using Catalog.Core.Repositories;
 using Catalog.Infrastructure.Data;
+using Catalog.Infrastructure.Documents;
+using Catalog.Infrastructure.Mappers;
 using Catalog.Infrastructure.Repositories;
+using Catalog.Infrastructure.Sorting;
 
 namespace Catalog.API.Extensions;
 
@@ -13,7 +15,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         // AutoMapper
-        services.AddAutoMapper(typeof(ProductMappingProfile).Assembly);
+        services.AddAutoMapper(typeof(ProductMappingProfile).Assembly, typeof(ProductDocumentProfile).Assembly);
 
         // MediatR
         services.AddMediatR(cfg =>
@@ -26,10 +28,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IBrandRepository, BrandRepository>();
 
         // Sorting Strategies and Factory
-        services.AddScoped<ISortStrategy, PriceAscSortStrategy>();
-        services.AddScoped<ISortStrategy, PriceDescSortStrategy>();
-        services.AddScoped<ISortStrategy, NameSortStrategy>();
-        services.AddScoped<ISortStrategyFactory, SortStrategyFactory>();
+        services.AddScoped<IMongoSortStrategy<ProductDocument>, MongoNameSortStrategy>();
+        services.AddScoped<IMongoSortStrategy<ProductDocument>, MongoPriceAscSortStrategy>();
+        services.AddScoped<IMongoSortStrategy<ProductDocument>, MongoPriceDescSortStrategy>();
+        services.AddScoped<MongoSortStrategyFactory<ProductDocument>>();
 
         return services;
     }

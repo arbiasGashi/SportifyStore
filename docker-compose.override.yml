@@ -8,12 +8,16 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: CatalogDb
 
   catalog.api:
     container_name: catalog.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - "DatabaseSettings__ConnectionString=mongodb://catalogdb:27017"
+      - "DatabaseSettings__ConnectionString=mongodb://root:password@catalogdb:27017/CatalogDb?authSource=admin"
       - "DatabaseSettings__DatabaseName=CatalogDb"
       - "DatabaseSettings__ProductsCollection=Products"
       - "DatabaseSettings__BrandsCollection=Brands"
@@ -22,3 +26,5 @@ services:
       - catalogdb
     ports:
       - "8010:8080"
+    volumes:
+      - ./Services/Catalog/Catalog.Infrastructure/Data/SeedData:/app/Data/SeedData

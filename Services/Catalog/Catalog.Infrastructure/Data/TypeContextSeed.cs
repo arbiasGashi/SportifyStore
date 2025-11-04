@@ -1,38 +1,39 @@
-﻿using Catalog.Core.Entities;
+﻿using Catalog.Infrastructure.Documents;
 using MongoDB.Driver;
 using System.Text.Json;
 
 namespace Catalog.Infrastructure.Data;
 public static class TypeContextSeed
 {
-    public static void SeedData(IMongoCollection<ProductType> typeCollection)
+    public static async Task SeedDataAsync(IMongoCollection<ProductTypeDocument> typeCollection)
     {
-        bool checkTypes = typeCollection.Find(b => true).Any();
+        var hasTypes = await typeCollection
+            .Find(t => true)
+            .AnyAsync();
 
-        // Current working directory (changes depending on environment)
-        string basePath = Directory.GetCurrentDirectory();
-
-        // Default path (Docker or root run)
-        string path = Path.Combine("Data", "SeedData", "types.json");
-
-        if (!File.Exists(path))
+        if (hasTypes)
         {
-            path = Path.Combine(Directory.GetParent(basePath)!.FullName,
-                                "Catalog.Infrastructure", "Data", "SeedData", "types.json");
+            return;
         }
 
-        if (!checkTypes)
-        {
-            var typesData = File.ReadAllText(path);
-            var types = JsonSerializer.Deserialize<List<ProductType>>(typesData);
+        // Use application base directory (safe in Docker)
+        var seedPath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData", "types.json");
 
-            if (types != null)
-            {
-                foreach (var type in types)
-                {
-                    typeCollection.InsertOneAsync(type);
-                }
-            }
+        if (!File.Exists(seedPath))
+        {
+            Console.WriteLine($"Seed file not found: {seedPath}");
+            return;
+        }
+
+        Console.WriteLine($"Seeding types from: {seedPath}");
+        var typesData = await File.ReadAllTextAsync(seedPath);
+        var types = JsonSerializer.Deserialize<List<ProductTypeDocument>>(typesData);
+
+        if (types != null && types.Count > 0)
+        {
+            await typeCollection.DeleteManyAsync(Builders<ProductTypeDocument>.Filter.Empty); // Clear before reseed
+            await typeCollection.InsertManyAsync(types);
+            Console.WriteLine($"Inserted {types.Count} type records.");
         }
     }
 }
