@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 
-namespace Catalog.Application.Mappers;
-public class ProductMapper
+namespace Basket.Application.Mappers;
+public class BasketMapper
 {
     public static IMapper Mapper => _lazy.Value;
 
@@ -10,7 +10,7 @@ public class ProductMapper
         var config = new MapperConfiguration(cfg =>
         {
             cfg.ShouldMapProperty = p => p.GetMethod.IsPublic || p.GetMethod.IsAssembly;
-            cfg.AddProfile<ProductMappingProfile>();
+            cfg.AddProfile<BasketMappingProfile>();
         });
 
         var mapper = config.CreateMapper();
