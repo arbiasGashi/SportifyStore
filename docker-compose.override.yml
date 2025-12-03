@@ -13,8 +13,15 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: CatalogDb
 
+  basketdb:
+    container_name: basketdb
+    restart: always
+    ports:
+      - "6379:6379"
+
   catalog.api:
     container_name: catalog.api
+    restart: always
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "DatabaseSettings__ConnectionString=mongodb://root:password@catalogdb:27017/CatalogDb?authSource=admin"
@@ -25,6 +32,28 @@ services:
     depends_on:
       - catalogdb
     ports:
-      - "8010:8080"
+      - "8000:8080"
     volumes:
       - ./Services/Catalog/Catalog.Infrastructure/Data/SeedData:/app/Data/SeedData
+
+  basket.api:
+    container_name: basket.api
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "CacheSettings__ConnectionString=basketdb:6379"
+    depends_on:
+      - basketdb      
+    ports:
+      - "8001:8080"
+
+  portainer:
+    container_name: portainer
+    restart: always
+    ports:
+      - "8080:8000"
+      - "9090:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
