@@ -2,52 +2,68 @@ version: '3.4'
 
 services:
   catalogdb:
-    container_name: catalogdb
-    restart: always
     ports:
       - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
       MONGO_INITDB_DATABASE: CatalogDb
 
   basketdb:
-    container_name: basketdb
-    restart: always
     ports:
       - "6379:6379"
 
+  discountdb:
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   catalog.api:
-    container_name: catalog.api
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - "DatabaseSettings__ConnectionString=mongodb://root:password@catalogdb:27017/CatalogDb?authSource=admin"
-      - "DatabaseSettings__DatabaseName=CatalogDb"
-      - "DatabaseSettings__ProductsCollection=Products"
-      - "DatabaseSettings__BrandsCollection=Brands"
-      - "DatabaseSettings__TypesCollection=Types"      
-    depends_on:
-      - catalogdb
     ports:
       - "8000:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+      - DatabaseSettings__ConnectionString=mongodb://root:password@catalogdb:27017/CatalogDb?authSource=admin
+      - DatabaseSettings__DatabaseName=CatalogDb
+      - DatabaseSettings__ProductsCollection=Products
+      - DatabaseSettings__BrandsCollection=Brands
+      - DatabaseSettings__TypesCollection=Types
     volumes:
       - ./Services/Catalog/Catalog.Infrastructure/Data/SeedData:/app/Data/SeedData
 
   basket.api:
-    container_name: basket.api
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - "CacheSettings__ConnectionString=basketdb:6379"
-    depends_on:
-      - basketdb      
     ports:
       - "8001:8080"
+    environment:
+      - ASPNETCORE_URLS=http://+:8080
+
+  discount.api:
+    ports:
+      - "8002:8080"
+    depends_on:
+      discountdb:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    depends_on:
+      - discountdb
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@eCommerce.net
+      - PGADMIN_DEFAULT_PASSWORD=Password@1
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
 
   portainer:
+    image: portainer/portainer-ce
     container_name: portainer
     restart: always
     ports:
@@ -57,3 +73,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
 
+volumes:
+  pgadmin_data:
+  portainer_data:
