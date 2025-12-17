@@ -4,40 +4,67 @@ services:
   catalogdb:
     image: mongo
     container_name: catalogdb
-    ports:
-      - "27017:27017"
+    restart: always
     volumes:
       - mongo_data:/data/db
-    restart: always
-  
+
   basketdb:
     image: redis:alpine
+    container_name: basketdb
+    restart: always
+
+  discountdb:
+    image: postgres:16-alpine
+    container_name: discountdb
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=Password@1
+      - POSTGRES_DB=DiscountDb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   catalog.api:
     image: catalogapi
+    container_name: catalog.api
     build:
       context: .
       dockerfile: Services/Catalog/Catalog.API/Dockerfile
-    ports:
-      - "8000:8080"       # map container port 8080 to host 8000
+    restart: always
     depends_on:
       - catalogdb
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - MongoDbSettings__ConnectionString=mongodb://catalogdb:27017
       - MongoDbSettings__DatabaseName=CatalogDb
-    restart: always
 
   basket.api:
-    image: ${DOCKER_REGISTRY-}basketapi
+    image: basketapi
+    container_name: basket.api
     build:
       context: .
       dockerfile: Services/Basket/Basket.API/Dockerfile
+    restart: always
+    depends_on:
+      - basketdb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - CacheSettings__ConnectionString=basketdb:6379
 
-  portainer:
-    image: portainer/portainer-ce
+  discount.api:
+    image: discountapi
+    container_name: discount.api
+    build:
+      context: .
+      dockerfile: Services/Discount/Discount.API/Dockerfile
+    restart: always
+    depends_on:
+      - discountdb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - DatabaseSettings__ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=Password@1;
 
 volumes:
   mongo_data:
-  portainer_data:
-
+  postgres_data:
