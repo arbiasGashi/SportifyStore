@@ -20,7 +20,7 @@ services:
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=Password@1
-      - POSTGRES_DB=DiscountDb
+      - POSTGRES_DB=DiscountDbdockere 
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

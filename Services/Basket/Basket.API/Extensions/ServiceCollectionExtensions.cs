@@ -1,10 +1,14 @@
 ﻿using Asp.Versioning;
+using Basket.Application.Abstractions;
 using Basket.Application.Commands;
 using Basket.Application.Mappers;
 using Basket.Application.Queries;
 using Basket.Core.Repositories;
 using Basket.Infrastructure.Repositories;
+using Basket.Infrastructure.Services;
+using Discount.Grpc.Protos;
 using Microsoft.OpenApi.Models;
+
 
 namespace Basket.API.Extensions;
 
@@ -25,6 +29,14 @@ public static class ServiceCollectionExtensions
         {
             options.Configuration = configuration.GetSection("CacheSettings:ConnectionString").Value;
         });
+
+        // gRPC client
+        services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(options =>
+        {
+            options.Address = new Uri(configuration["GrpcSettings:DiscountUrl"]!);
+        });
+
+        services.AddScoped<IDiscountService, DiscountGrpcDiscountService>();
 
         // Repositories
         services.AddScoped<IBasketRepository, BasketRepository>();

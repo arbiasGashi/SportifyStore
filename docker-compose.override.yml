@@ -40,6 +40,7 @@ services:
       - "8001:8080"
     environment:
       - ASPNETCORE_URLS=http://+:8080
+      - GrpcSettings__DiscountUrl=http://discount.api:8080
 
   discount.api:
     ports:
