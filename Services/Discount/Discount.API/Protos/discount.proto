@@ -17,12 +17,13 @@ message CouponModel {
   int32 id = 1;
   string productName = 2;
   string description = 3;
-  int32 amount = 4;
+  int32 amount = 4; // Represents the discount value in minor currency units (cents)
 }
 
 message CreateDiscountRequest {
   CouponModel coupon = 1;
 }
+
 message UpdateDiscountRequest {
   CouponModel coupon = 1;
 }
