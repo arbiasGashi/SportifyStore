@@ -1,5 +1,5 @@
 using Catalog.API.Extensions;
-using Catalog.Infrastructure.Data;
+using Catalog.Infrastructure.Extensions;
 
 namespace Catalog.API
 {
@@ -15,16 +15,13 @@ namespace Catalog.API
             // Modular registrations
             builder.Services.AddApiVersioningConfig()
                             .AddSwaggerConfig()
-                            .AddApplicationServices();
+                            .AddApplicationServices()
+                            .AddInfrastructureServices(builder.Configuration);
 
             var app = builder.Build();
 
             // Seed database once at startup
-            using (var scope = app.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<ICatalogContext>();
-                await ((CatalogContext)context).SeedAsync();
-            }
+            await app.Services.EnsureCatalogDatabaseSeededAsync();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
