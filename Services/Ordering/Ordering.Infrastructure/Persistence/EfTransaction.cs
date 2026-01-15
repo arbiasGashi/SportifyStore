@@ -1,0 +1,23 @@
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using Ordering.Application.Abstractions.Persistence;
+
+namespace Ordering.Infrastructure.Persistence;
+
+public sealed class EfTransaction : ITransaction
+{
+    private readonly IDbContextTransaction _tx;
+
+    public EfTransaction(IDbContextTransaction tx)
+    {
+        _tx = tx;
+    }
+
+    public Task CommitAsync(CancellationToken ct = default)
+        => _tx.CommitAsync(ct);
+
+    public Task RollbackAsync(CancellationToken ct = default)
+        => _tx.RollbackAsync(ct);
+
+    public ValueTask DisposeAsync()
+        => _tx.DisposeAsync();
+}
