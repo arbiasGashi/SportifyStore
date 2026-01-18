@@ -18,7 +18,6 @@ public class OrderRepository : IOrderRepository
     {
         var order =  await _db
             .Orders
-            .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.Id == id, ct);
 
         return order;
@@ -28,7 +27,6 @@ public class OrderRepository : IOrderRepository
     {
         var orders = await _db
             .Orders
-            .Include(o => o.Items)
             .Where(o => o.UserName == userName)
             .ToListAsync(ct);
 
