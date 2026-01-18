@@ -11,11 +11,18 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.ToTable("Orders");
 
         builder.HasKey(o => o.Id);
-        builder.Property(o => o.Id).ValueGeneratedOnAdd();
+        builder.Property(o => o.Id)
+            .ValueGeneratedOnAdd();
 
         builder.Property(o => o.UserName)
             .IsRequired()
             .HasMaxLength(256);
+
+        builder.ToTable(t =>
+            t.HasCheckConstraint(
+                "CK_Orders_UserName_NotEmpty",
+                "LEN(LTRIM(RTRIM([UserName]))) > 0")
+            );
 
         builder.Property(o => o.Status)
             .IsRequired()
@@ -24,59 +31,53 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         // Address (Owned Value Object)
         builder.OwnsOne(o => o.ShippingAddress, address =>
         {
-            address
-            .Property(a => a.FirstName)
+            address.Property(a => a.FirstName)
             .HasColumnName("FirstName")
             .IsRequired()
             .HasMaxLength(100);
 
-            address
-            .Property(a => a.LastName)
+            address.Property(a => a.LastName)
             .HasColumnName("LastName")
             .IsRequired()
             .HasMaxLength(100);
 
-            address
-            .Property(a => a.Email)
+            address.Property(a => a.Email)
             .HasColumnName("Email")
             .IsRequired()
             .HasMaxLength(100);
 
-            address
-            .Property(a => a.AddressLine)
+            address.Property(a => a.AddressLine)
             .HasColumnName("AddressLine")
             .IsRequired()
             .HasMaxLength(300);
 
-            address
-            .Property(a => a.Country)
+            address.Property(a => a.Country)
             .HasColumnName("Country")
             .IsRequired()
             .HasMaxLength(100);
 
-            address
-            .Property(a => a.State)
+            address.Property(a => a.State)
             .HasColumnName("State")
             .IsRequired()
             .HasMaxLength(100);
 
-            address
-            .Property(a => a.ZipCode)
+            address.Property(a => a.ZipCode)
             .HasColumnName("ZipCode")
             .IsRequired()
             .HasMaxLength(20);
         });
 
+        builder.Navigation(o => o.ShippingAddress)
+            .IsRequired();
+
         // Payment (Owned Value Object) - optional (Payment?)
         builder.OwnsOne(o => o.Payment, payment =>
         {
-            payment
-            .Property(p => p.Method)
+            payment.Property(p => p.Method)
             .HasColumnName("PaymentMethod")
             .HasConversion<int>();
 
-            payment
-            .Property(p => p.PaymentReference)
+            payment.Property(p => p.PaymentReference)
             .HasColumnName("PaymentReference")
             .HasMaxLength(200);
         });
