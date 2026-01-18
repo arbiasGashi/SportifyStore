@@ -78,7 +78,6 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             payment
             .Property(p => p.PaymentReference)
             .HasColumnName("PaymentReference")
-            .IsRequired()
             .HasMaxLength(200);
         });
 
@@ -88,8 +87,12 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasForeignKey("OrderId")
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Always load aggregate members with the root
+        builder.Navigation(o => o.Items)
+            .AutoInclude();
+
         // Important for rich domain: map using field access for the Items navigation
-        var navigation = builder.Metadata.FindNavigation(nameof(Order.Items));
-        navigation?.SetPropertyAccessMode(PropertyAccessMode.Field);
+        builder.Navigation(o => o.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
