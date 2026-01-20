@@ -7,7 +7,7 @@ namespace Ordering.Application.Behaviours;
 
 public sealed class TransactionBehaviour<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : ICommand<TResponse>
+    where TRequest : IRequest<TResponse>
 {
     private readonly IUnitOfWork _uow;
     private readonly ILogger<TransactionBehaviour<TRequest, TResponse>> _logger;
@@ -25,6 +25,12 @@ public sealed class TransactionBehaviour<TRequest, TResponse>
         RequestHandlerDelegate<TResponse> next,
         CancellationToken ct)
     {
+        if (request is not ICommandMarker)
+        {
+            // It's a query, no transaction needed
+            return await next();
+        }
+
         var requestName = typeof(TRequest).Name;
 
         await using var tx = await _uow.BeginTransactionAsync(ct);
