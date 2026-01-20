@@ -51,9 +51,4 @@ public class OrderRepository : IOrderRepository
         _db.Orders.Remove(order);
         return Task.CompletedTask;
     }
-
-    public async Task SaveChangesAsync(CancellationToken ct = default)
-    {
-        await _db.SaveChangesAsync(ct);
-    }
 }

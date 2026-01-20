@@ -8,5 +8,4 @@ public interface IOrderRepository
     Task<IReadOnlyList<Order>> GetByUserNameAsync(string userName, CancellationToken ct = default);
     Task AddAsync(Order order, CancellationToken ct = default);
     Task DeleteAsync(Order order, CancellationToken ct = default);
-    Task SaveChangesAsync(CancellationToken ct = default);
 }
