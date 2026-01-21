@@ -2,7 +2,7 @@
 
 public sealed record OrderResponse(
     int Id,
-    string UserName,
+    string BuyerName,
     AddressResponse ShippingAddress,
     PaymentResponse Payment,
     IReadOnlyList<OrderItemResponse> Items,

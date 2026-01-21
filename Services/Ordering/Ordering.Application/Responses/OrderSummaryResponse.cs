@@ -2,7 +2,7 @@
 
 public sealed record OrderSummaryResponse(
     int Id,
-    string UserName,
+    string BuyerName,
     int ItemsCount,
     decimal Total
 );

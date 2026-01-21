@@ -9,7 +9,7 @@ public class Order : Entity
 {
     private readonly List<OrderItem> _items = new();
 
-    public string UserName { get; private set; } = string.Empty;
+    public string BuyerName { get; private set; } = string.Empty;
     public Address ShippingAddress { get; private set; } = default!;
     public Payment? Payment { get; private set; }
     public OrderStatus Status { get; private set; } = OrderStatus.Draft;
@@ -21,29 +21,29 @@ public class Order : Entity
     private Order() { }
 
     // Private constructor used only by factory
-    private Order(string userName)
+    private Order(string buyerName)
     {
-        UserName = userName;
+        BuyerName = buyerName;
     }
 
-    private Order(string userName, Address shippingAddress)
+    private Order(string buyerName, Address shippingAddress)
     {
-        if (string.IsNullOrWhiteSpace(userName))
+        if (string.IsNullOrWhiteSpace(buyerName))
         {
-            throw new DomainException("UserName is required.");
+            throw new DomainException("Buyer name is required.");
         }
 
-        UserName = userName.Trim();
+        BuyerName = buyerName.Trim();
         ShippingAddress = shippingAddress;
         Status = OrderStatus.Draft;
     }
 
-    public static Order Create(string userName, Address address, Payment payment)
+    public static Order Create(string buyerName, Address address, Payment payment)
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new DomainException("UserName is required.");
+        if (string.IsNullOrWhiteSpace(buyerName))
+            throw new DomainException("Buyer name is required.");
 
-        var order = new Order(userName.Trim());
+        var order = new Order(buyerName.Trim());
         order.SetShippingAddress(address);
         order.SetPayment(payment);
 
@@ -51,8 +51,8 @@ public class Order : Entity
     }
 
 
-    public static Order Create(string userName, Address shippingAddress)
-        => new Order(userName, shippingAddress);
+    public static Order Create(string buyerName, Address shippingAddress)
+        => new Order(buyerName, shippingAddress);
 
     public void SetShippingAddress(Address address)
     {

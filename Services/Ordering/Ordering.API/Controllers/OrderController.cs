@@ -17,11 +17,11 @@ public class OrderController : ApiController
     }
 
     [HttpGet]
-    [Route("[action]/{userName}", Name = "GetOrdersByUserName")]
+    [Route("[action]/{buyerName}", Name = "GetOrdersByBuyerName")]
     [ProducesResponseType(typeof(IReadOnlyList<OrderSummaryResponse>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult<IReadOnlyList<OrderSummaryResponse>>> GetOrdersByUserName(string userName)
+    public async Task<ActionResult<IReadOnlyList<OrderSummaryResponse>>> GetOrdersByBuyerName(string buyerName)
     {
-        var query = new GetOrdersByUserNameQuery(userName);
+        var query = new GetOrdersByBuyerNameQuery(buyerName);
         var result = await _mediator.Send(query);
 
         return Ok(result);

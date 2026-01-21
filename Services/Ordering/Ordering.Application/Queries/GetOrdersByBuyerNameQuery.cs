@@ -3,5 +3,5 @@ using Ordering.Application.Responses;
 
 namespace Ordering.Application.Queries;
 
-public sealed record GetOrdersByUserNameQuery(string UserName)
+public sealed record GetOrdersByBuyerNameQuery(string BuyerName)
     : IRequest<IReadOnlyList<OrderSummaryResponse>>;

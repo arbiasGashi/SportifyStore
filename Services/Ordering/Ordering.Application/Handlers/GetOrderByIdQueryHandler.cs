@@ -54,7 +54,7 @@ public sealed class GetOrderByIdQueryHandler
 
         return new OrderResponse(
             Id: order.Id,
-            UserName: order.UserName,
+            BuyerName: order.BuyerName,
             ShippingAddress: address,
             Payment: payment,
             Items: items,

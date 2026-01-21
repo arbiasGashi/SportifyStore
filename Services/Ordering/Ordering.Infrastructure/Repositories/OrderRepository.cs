@@ -23,11 +23,11 @@ public class OrderRepository : IOrderRepository
         return order;
     }
 
-    public async Task<IReadOnlyList<Order>> GetByUserNameAsync(string userName, CancellationToken ct = default)
+    public async Task<IReadOnlyList<Order>> GetByBuyerNameAsync(string buyerName, CancellationToken ct = default)
     {
         var orders = await _db
             .Orders
-            .Where(o => o.UserName == userName)
+            .Where(o => o.BuyerName == buyerName)
             .ToListAsync(ct);
 
         return orders;

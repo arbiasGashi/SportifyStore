@@ -37,11 +37,11 @@ public sealed class CheckoutOrderCommandHandler : IRequestHandler<CheckoutOrderC
             request.Payment.PaymentReference);
 
         // Domain-first construction (no AutoMapper into entities)
-        var order = Order.Create(request.UserName, address, payment);
+        var order = Order.Create(request.BuyerName, address, payment);
 
         await _orders.AddAsync(order, ct);
 
-        _logger.LogInformation("Order created. OrderId={OrderId} UserName={UserName}", order.Id, request.UserName);
+        _logger.LogInformation("Order created. OrderId={OrderId} BuyerName={BuyerName}", order.Id, request.BuyerName);
 
         return order.Id;
     }

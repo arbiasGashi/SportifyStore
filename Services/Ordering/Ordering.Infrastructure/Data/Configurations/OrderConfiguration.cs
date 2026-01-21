@@ -14,14 +14,14 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Id)
             .ValueGeneratedOnAdd();
 
-        builder.Property(o => o.UserName)
+        builder.Property(o => o.BuyerName)
             .IsRequired()
             .HasMaxLength(256);
 
         builder.ToTable(t =>
             t.HasCheckConstraint(
-                "CK_Orders_UserName_NotEmpty",
-                "LEN(LTRIM(RTRIM([UserName]))) > 0")
+                "CK_Orders_BuyerName_NotEmpty",
+                "LEN(LTRIM(RTRIM([BuyerName]))) > 0")
             );
 
         builder.Property(o => o.Status)
