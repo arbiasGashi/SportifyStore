@@ -23,6 +23,16 @@ services:
       - POSTGRES_DB=DiscountDbdockere 
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  
+  orderingdb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: orderingdb
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password@1
+    volumes:
+      - mssql_data:/var/opt/mssql
 
   catalog.api:
     image: catalogapi
@@ -65,6 +75,19 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - DatabaseSettings__ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=Password@1;
 
+  ordering.api:
+    image: orderingapi
+    container_name: ordering.api
+    build:
+      context: .
+      dockerfile: Services/Ordering/Ordering.API/Dockerfile
+    restart: always
+    depends_on:
+      - orderingdb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
 volumes:
   mongo_data:
   postgres_data:
+  mssql_data:

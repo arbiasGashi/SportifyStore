@@ -1,29 +1,30 @@
+using Ordering.API.Extensions;
+using Ordering.Application.Extensions;
 using Ordering.Infrastructure.Extensions;
 
 namespace Ordering.API;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-
+        // Add core services
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
-        // register Infrastructure (DbContext, repos, UoW)
-        builder.Services.AddInfrastructureServices(builder.Configuration);
-
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        // Modular registrations
+        builder.Services.AddApiVersioningConfig()
+                        .AddSwaggerConfig()
+                        .AddApplicationServices()
+                        .AddInfrastructureServices(builder.Configuration);
 
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
+            await app.Services.ApplyOrderingMigrationAsync();
             app.UseSwagger();
             app.UseSwaggerUI();
         }
