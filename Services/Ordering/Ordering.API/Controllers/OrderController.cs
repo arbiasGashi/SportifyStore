@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Ordering.Application.Commands;
 using Ordering.Application.Queries;
 using Ordering.Application.Responses;
+using System;
 using System.Net;
 
 namespace Ordering.API.Controllers;
@@ -17,11 +18,11 @@ public class OrderController : ApiController
     }
 
     [HttpGet]
-    [Route("[action]/{userName}", Name = "GetOrdersByUserName")]
+    [Route("[action]/{buyer}", Name = "GetOrdersByBuyer")]
     [ProducesResponseType(typeof(IReadOnlyList<OrderSummaryResponse>), (int)HttpStatusCode.OK)]
-    public async Task<ActionResult<IReadOnlyList<OrderSummaryResponse>>> GetOrdersByUserName(string userName)
+    public async Task<ActionResult<IReadOnlyList<OrderSummaryResponse>>> GetOrdersByBuyer(string buyer)
     {
-        var query = new GetOrdersByUserNameQuery(userName);
+        var query = new GetOrdersByBuyerQuery(buyer);
         var result = await _mediator.Send(query);
 
         return Ok(result);

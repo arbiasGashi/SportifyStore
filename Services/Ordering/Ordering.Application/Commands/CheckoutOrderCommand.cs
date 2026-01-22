@@ -4,7 +4,7 @@ using Ordering.Application.Contracts;
 namespace Ordering.Application.Commands;
 
 public sealed record CheckoutOrderCommand(
-    string UserName,
+    string Buyer,
     AddressDto ShippingAddress,
     PaymentDto Payment
 ) : ICommand<int>;

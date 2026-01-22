@@ -50,15 +50,21 @@ public sealed class GetOrderByIdQueryHandler
             PaymentReference: order.Payment.PaymentReference
         );
 
-        var total = items.Sum(x => x.LineTotal);
+        var subtotal = order.Subtotal();
+        var tax = order.Tax();
+        var shippingCost = order.ShippingCost();
+        var total = order.Total();
 
         return new OrderResponse(
             Id: order.Id,
-            UserName: order.UserName,
+            Buyer: order.Buyer,
             ShippingAddress: address,
             Payment: payment,
             Items: items,
-            Total: total
+            Subtotal: subtotal.Amount,
+            Tax: tax.Amount,
+            ShippingCost: shippingCost.Amount,
+            Total: total.Amount
         );
     }
 }

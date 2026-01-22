@@ -7,57 +7,72 @@ namespace Ordering.Core.Entities;
 
 public class Order : Entity
 {
+    private const decimal TAX_RATE = 0.10m;
+    private const decimal FREE_SHIPPING_THRESHOLD = 100m;
+    private const decimal STANDARD_SHIPPING_COST = 10m;
+
     private readonly List<OrderItem> _items = new();
 
-    public string UserName { get; private set; } = string.Empty;
+    public string Buyer { get; private set; } = string.Empty;
     public Address ShippingAddress { get; private set; } = default!;
     public Payment? Payment { get; private set; }
     public OrderStatus Status { get; private set; } = OrderStatus.Draft;
 
     // Expose read-only view (aggregate root controls mutations)
-    public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+    public IReadOnlyCollection<OrderItemSnapshot> Items => _items
+        .Select(item => new OrderItemSnapshot(
+            item.ProductId,
+            item.ProductName,
+            item.UnitPrice,
+            item.Quantity,
+            item.LineTotal))
+        .ToList();
 
     // EF Core
     private Order() { }
 
     // Private constructor used only by factory
-    private Order(string userName)
+    private Order(string buyer)
     {
-        UserName = userName;
+        Buyer = buyer;
     }
 
-    private Order(string userName, Address shippingAddress)
+    private Order(string buyer, Address shippingAddress)
     {
-        if (string.IsNullOrWhiteSpace(userName))
+        if (string.IsNullOrWhiteSpace(buyer))
         {
-            throw new DomainException("UserName is required.");
+            throw new DomainException("Buyer is required.");
         }
 
-        UserName = userName.Trim();
+        Buyer = buyer.Trim();
         ShippingAddress = shippingAddress;
         Status = OrderStatus.Draft;
     }
 
-    public static Order Create(string userName, Address address, Payment payment)
+    public static Order Create(string buyer, Address address, Payment payment)
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new DomainException("UserName is required.");
+        if (string.IsNullOrWhiteSpace(buyer))
+        {
+            throw new DomainException("Buyer is required.");
+        }
 
-        var order = new Order(userName.Trim());
+        var order = new Order(buyer.Trim());
         order.SetShippingAddress(address);
-        order.SetPayment(payment);
+        order.Pay(payment);
 
         return order;
     }
 
 
-    public static Order Create(string userName, Address shippingAddress)
-        => new Order(userName, shippingAddress);
+    public static Order Create(string buyer, Address shippingAddress)
+        => new Order(buyer, shippingAddress);
 
     public void SetShippingAddress(Address address)
     {
         if (address is null)
+        {
             throw new DomainException("Shipping address is required.");
+        }
 
         EnsureEditable();
         ShippingAddress = address;
@@ -72,11 +87,21 @@ public class Order : Entity
             throw new DomainException("Quantity must be greater than 0.");
         }
 
+        if (_items.Count > 0 && _items[0].UnitPrice.Currency != unitPrice.Currency)
+        {
+            throw new DomainException("All order items must use the same currency.");
+        }
+
         // Merge same product into a single line
         var existing = _items.FirstOrDefault(i => i.ProductId == productId);
 
         if (existing is not null)
         {
+            if (existing.UnitPrice.Currency != unitPrice.Currency)
+            {
+                throw new DomainException("Order item currency mismatch.");
+            }
+
             existing.ChangeQuantity(existing.Quantity + quantity);
             return;
         }
@@ -112,9 +137,38 @@ public class Order : Entity
         _items.Remove(item);
     }
 
+    public Money Subtotal()
+    {
+        if (_items.Count == 0)
+        {
+            return Money.From(0, Currency.USD);
+        }
+
+        var currency = _items[0].UnitPrice.Currency;
+        return _items.Aggregate(Money.From(0, currency), (acc, item) => acc + item.LineTotal);
+    }
+
+    public Money Tax()
+    {
+        var subtotal = Subtotal();
+        return Money.From(subtotal.Amount * TAX_RATE, subtotal.Currency);
+    }
+
+    public Money ShippingCost()
+    {
+        var subtotal = Subtotal();
+
+        if (subtotal.Amount >= FREE_SHIPPING_THRESHOLD)
+        {
+            return Money.From(0, subtotal.Currency);
+        }
+
+        return Money.From(STANDARD_SHIPPING_COST, subtotal.Currency);
+    }
+
     public Money Total()
     {
-        return _items.Aggregate(Money.From(0), (acc, item) => acc + item.LineTotal);
+        return Subtotal() + Tax() + ShippingCost();
     }
 
     public void Submit()
@@ -129,7 +183,7 @@ public class Order : Entity
         Status = OrderStatus.Submitted;
     }
 
-    public void SetPayment(Payment payment)
+    public void Pay(Payment payment)
     {
         if (Status is not OrderStatus.Submitted)
         {
@@ -140,7 +194,7 @@ public class Order : Entity
         Status = OrderStatus.Paid;
     }
 
-    public void MarkAsShipped()
+    public void Ship()
     {
         if (Status is not OrderStatus.Paid)
         {
