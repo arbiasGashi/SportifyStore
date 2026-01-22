@@ -1,14 +1,15 @@
 ﻿using Ordering.Core.Common;
 using Ordering.Core.Exceptions;
 using Ordering.Core.ValueObjects;
+using Ordering.Core.Enums;
 
 namespace Ordering.Core.Entities;
 
-public class OrderItem : Entity
+internal sealed class OrderItem : Entity
 {
     public int ProductId { get; private set; }
     public string ProductName { get; private set; } = string.Empty;
-    public Money UnitPrice { get; private set; } = Money.From(0);
+    public Money UnitPrice { get; private set; } = Money.From(0, Currency.USD);
     public int Quantity { get; private set; }
 
     public Money LineTotal => UnitPrice * Quantity;
@@ -51,4 +52,3 @@ public class OrderItem : Entity
         Quantity = quantity;
     }
 }
-

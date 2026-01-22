@@ -5,27 +5,28 @@ using Ordering.Core.Repositories;
 
 namespace Ordering.Application.QueryHandlers;
 
-public sealed class GetOrdersByUserNameQueryHandler
-    : IRequestHandler<GetOrdersByUserNameQuery, IReadOnlyList<OrderSummaryResponse>>
+public sealed class GetOrdersByBuyerQueryHandler
+    : IRequestHandler<GetOrdersByBuyerQuery, IReadOnlyList<OrderSummaryResponse>>
 {
     private readonly IOrderRepository _orders;
 
-    public GetOrdersByUserNameQueryHandler(IOrderRepository orders)
+    public GetOrdersByBuyerQueryHandler(IOrderRepository orders)
     {
         _orders = orders;
     }
 
-    public async Task<IReadOnlyList<OrderSummaryResponse>> Handle(GetOrdersByUserNameQuery request, CancellationToken ct)
+    public async Task<IReadOnlyList<OrderSummaryResponse>> Handle(GetOrdersByBuyerQuery request, CancellationToken ct)
     {
-        var orders = await _orders.GetByUserNameAsync(request.UserName, ct);
+        var orders = await _orders.GetByBuyerAsync(request.Buyer, ct);
 
         return orders
             .Select(o =>
             {
-                var total = o.Items.Sum(i => i.LineTotal.Amount); // uses domain behavior
+                var total = o.Total().Amount;
+
                 return new OrderSummaryResponse(
                     Id: o.Id,
-                    UserName: o.UserName,
+                    Buyer: o.Buyer,
                     ItemsCount: o.Items.Count,
                     Total: total
                 );

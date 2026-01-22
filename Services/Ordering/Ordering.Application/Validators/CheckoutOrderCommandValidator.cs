@@ -7,7 +7,7 @@ public sealed class CheckoutOrderCommandValidator : AbstractValidator<CheckoutOr
 {
     public CheckoutOrderCommandValidator()
     {
-        RuleFor(x => x.UserName)
+        RuleFor(x => x.Buyer)
             .NotEmpty()
             .MaximumLength(70);
 

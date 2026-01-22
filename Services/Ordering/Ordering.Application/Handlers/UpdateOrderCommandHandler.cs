@@ -42,7 +42,7 @@ public sealed class UpdateOrderCommandHandler : IRequestHandler<UpdateOrderComma
             request.Payment.PaymentReference);
 
         order.SetShippingAddress(address);
-        order.SetPayment(payment);
+        order.Pay(payment);
 
         _logger.LogInformation("Order updated. OrderId={OrderId}", order.Id);
     }

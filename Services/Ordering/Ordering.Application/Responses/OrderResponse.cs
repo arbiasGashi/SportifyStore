@@ -2,10 +2,13 @@
 
 public sealed record OrderResponse(
     int Id,
-    string UserName,
+    string Buyer,
     AddressResponse ShippingAddress,
     PaymentResponse Payment,
     IReadOnlyList<OrderItemResponse> Items,
+    decimal Subtotal,
+    decimal Tax,
+    decimal ShippingCost,
     decimal Total
 );
 

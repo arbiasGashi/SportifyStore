@@ -4,7 +4,7 @@ using Ordering.Core.Entities;
 
 namespace Ordering.Infrastructure.Data.Configurations;
 
-public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
+internal sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 {
     public void Configure(EntityTypeBuilder<OrderItem> builder)
     {
@@ -31,6 +31,12 @@ public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
             money.Property(m => m.Amount)
                 .HasColumnName("UnitPrice")
                 .HasPrecision(18, 2)  // SQL Server money-like precision
+                .IsRequired();
+
+            money.Property(m => m.Currency)
+                .HasColumnName("UnitPriceCurrency")
+                .HasMaxLength(3)
+                .HasConversion<string>()
                 .IsRequired();
         });
 
